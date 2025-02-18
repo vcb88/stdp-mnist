@@ -3,31 +3,41 @@ FROM ubuntu:14.04
 # Add old-releases repository as 14.04 is no longer supported
 RUN sed -i -e 's/archive.ubuntu.com\|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 
+# Install Python and system dependencies
 RUN apt-get update && apt-get install -y \
     python2.7 \
-    python-pip \
     python-dev \
+    python-pip \
     build-essential \
     liblapack-dev \
     gfortran \
     pkg-config \
     libfreetype6-dev \
     libpng12-dev \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages from Ubuntu repositories
+RUN apt-get update && apt-get install -y \
     python-numpy \
     python-scipy \
     python-matplotlib \
+    python-setuptools \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip to a compatible version
-RUN pip install --upgrade "pip < 21.0"
+# Install specific version of pip
+RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
+    python get-pip.py 'pip==20.3.4' && \
+    rm get-pip.py
 
-# Configure pip to use old PyPI URL format
-RUN mkdir -p ~/.pip && echo "[global]\nindex-url = https://pypi.python.org/simple/\nformat = legacy" > ~/.pip/pip.conf
+# Install Brian and dependencies
+RUN pip install --index-url https://pypi.python.org/simple/ --no-deps \
+    'sympy==0.7.4' \
+    'brian==1.4.1'
 
-# Copy requirements file
-COPY requirements.txt /app/
-# Install specific versions using wheels where possible
-RUN pip install -r /app/requirements.txt
+# Add matplotlib backend configuration
+RUN mkdir -p /root/.config/matplotlib && \
+    echo "backend: Agg" > /root/.config/matplotlib/matplotlibrc
 
 # Set up working directory
 WORKDIR /app

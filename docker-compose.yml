@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
   brian1-stdp:
     build: .
@@ -8,14 +8,25 @@ services:
       - ./weights:/app/weights
       - ./random:/app/random
       - ./results:/app/results
+      - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DISPLAY=:1
+      - PYTHONPATH=/app
     network_mode: host
     mem_limit: 4g
     shm_size: 2g
+    cap_add:
+      - SYS_NICE
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    command: python Diehl\&Cook_spiking_MNIST.py  # default command, can be overridden
+      nice:
+        soft: -10
+        hard: -10
+    devices:
+      - /dev/dri:/dev/dri
+    command: python -u Diehl\&Cook_spiking_MNIST.py  # -u для небуферизованного вывода
     working_dir: /app
+    stdin_open: true
+    tty: true
