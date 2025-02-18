@@ -41,16 +41,28 @@ print_status() {
 
 case "$1" in
     "train")
+        # Default values
+        examples=60000
+        epochs=3
+        
+        # Check for additional arguments
+        if [ "$2" != "" ]; then
+            examples=$2
+        fi
+        if [ "$3" != "" ]; then
+            epochs=$3
+        fi
+        
         echo "Starting network training..."
         echo "This will:"
-        echo "- Process 60,000 training examples"
-        echo "- Run for 3 epochs (180,000 total examples)"
+        echo "- Process $examples training examples per epoch"
+        echo "- Run for $epochs epochs ($((examples * epochs)) total examples)"
         echo "- Save weights in weights/ directory"
         echo "- Generate plots in results/ directory"
         echo
         print_status
         echo "Starting Docker container..."
-        docker-compose run --rm brian1-stdp python "Diehl&Cook_spiking_MNIST.py" --train
+        docker-compose run --rm brian1-stdp python "Diehl&Cook_spiking_MNIST.py" --train --examples $examples --epochs $epochs
         ;;
     "test")
         if [ ! -d "weights" ] || [ -z "$(ls -A weights/)" ]; then
@@ -58,15 +70,24 @@ case "$1" in
             echo "Please run training first: $0 train"
             exit 1
         fi
+        
+        # Default value
+        examples=10000
+        
+        # Check for additional argument
+        if [ "$2" != "" ]; then
+            examples=$2
+        fi
+        
         echo "Starting network testing..."
         echo "This will:"
         echo "- Load weights from weights/ directory"
-        echo "- Process 10,000 test examples"
+        echo "- Process $examples test examples"
         echo "- Generate evaluation plots"
         echo
         print_status
         echo "Starting Docker container..."
-        docker-compose run --rm brian1-stdp python "Diehl&Cook_spiking_MNIST.py" --test
+        docker-compose run --rm brian1-stdp python "Diehl&Cook_spiking_MNIST.py" --test --examples $examples
         ;;
     "random")
         echo "Generating random connectivity matrices..."
@@ -97,14 +118,18 @@ case "$1" in
     *)
         echo "STDP-MNIST Network Training/Testing Tool"
         echo
-        echo "Usage: $0 {train|test|random|evaluate|shell}"
+        echo "Usage:"
+        echo "  $0 train [examples_per_epoch] [num_epochs]  - Train the network"
+        echo "  $0 test [num_examples]                      - Test the network"
+        echo "  $0 random                                   - Generate connectivity"
+        echo "  $0 evaluate                                 - Evaluate performance"
+        echo "  $0 shell                                   - Open shell in container"
         echo
-        echo "Commands:"
-        echo "  train     - Train the network (3 epochs, 180k examples)"
-        echo "  test      - Test the network (10k examples)"
-        echo "  random    - Generate random connectivity matrices"
-        echo "  evaluate  - Evaluate network performance"
-        echo "  shell     - Open interactive shell in container"
+        echo "Examples:"
+        echo "  $0 train                   # Train with defaults (60000 examples, 3 epochs)"
+        echo "  $0 train 1000 2            # Train with 1000 examples for 2 epochs"
+        echo "  $0 test                    # Test with defaults (10000 examples)"
+        echo "  $0 test 100                # Test with 100 examples"
         echo
         print_status
         exit 1

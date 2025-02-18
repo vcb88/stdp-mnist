@@ -212,6 +212,8 @@ import argparse
 parser = argparse.ArgumentParser(description='STDP for MNIST - Training/Testing mode selection')
 parser.add_argument('--train', action='store_true', help='Run in training mode')
 parser.add_argument('--test', action='store_true', help='Run in testing mode')
+parser.add_argument('--examples', type=int, help='Number of examples to process (default: 10000 for test, 180000 for train)')
+parser.add_argument('--epochs', type=int, help='Number of training epochs (default: 3)')
 args = parser.parse_args()
 
 if args.train and args.test:
@@ -219,7 +221,7 @@ if args.train and args.test:
     exit(1)
 elif not (args.train or args.test):
     print("Error: Must specify either --train or --test")
-    print("Usage: python Diehl&Cook_spiking_MNIST.py [--train|--test]")
+    print("Usage: python Diehl&Cook_spiking_MNIST.py [--train|--test] [--examples N] [--epochs N]")
     exit(1)
 
 test_mode = not args.train  # test_mode is True when not in training mode
@@ -242,21 +244,22 @@ np.random.seed(0)
 data_path = './'
 if test_mode:
     weight_path = data_path + 'weights/'
-    num_examples = 10000 * 1
+    num_examples = args.examples if args.examples else 10000
     use_testing_set = True
     do_plot_performance = False
     record_spikes = True
     ee_STDP_on = False
     update_interval = num_examples
 else:
-    weight_path = data_path + 'random/'  
-    num_examples = 60000 * 3
+    weight_path = data_path + 'random/'
+    num_epochs = args.epochs if args.epochs else 3
+    examples_per_epoch = args.examples if args.examples else 60000
+    num_examples = examples_per_epoch * num_epochs
+    print('Training with %d examples per epoch for %d epochs (%d total examples)' % 
+          (examples_per_epoch, num_epochs, num_examples))
     use_testing_set = False
     do_plot_performance = True
-    if num_examples <= 60000:    
-        record_spikes = True
-    else:
-        record_spikes = True
+    record_spikes = True
     ee_STDP_on = True
 
 
