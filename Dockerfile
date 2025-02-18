@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 # Add old-releases repository as 14.04 is no longer supported
 RUN sed -i -e 's/archive.ubuntu.com\|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 
-# Install Python and system dependencies
+# Install all required packages from Ubuntu repositories
 RUN apt-get update && apt-get install -y \
     python2.7 \
     python-dev \
@@ -14,39 +14,21 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libfreetype6-dev \
     libpng12-dev \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python packages from Ubuntu repositories
-RUN apt-get update && apt-get install -y \
     python-numpy \
     python-scipy \
     python-matplotlib \
+    python-sympy \
+    python-brian \
     python-setuptools \
     && rm -rf /var/lib/apt/lists/*
 
-# Install specific version of pip with SSL verification disabled
-RUN wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
-    python get-pip.py --index-url=http://pypi.python.org/simple/ --trusted-host pypi.python.org 'pip==20.3.4' && \
-    rm get-pip.py
-
-# Configure pip to trust PyPI
-RUN mkdir -p ~/.pip && \
-    echo "[global]\n\
-trusted-host = \
-    pypi.python.org \
-    pypi.org \
-    files.pythonhosted.org\n\
-timeout = 60\n\
-retries = 10\n" > ~/.pip/pip.conf
-
-# Install specific versions of required packages
-RUN pip install --no-deps \
-    'numpy==1.9.1' \
-    'scipy==0.14.0' \
-    'matplotlib==1.4.2' \
-    'sympy==0.7.4' \
-    'brian==1.4.1'
+# Print versions of installed packages for reference
+RUN echo "Installed package versions:" && \
+    python -c "import numpy; print('numpy: ' + numpy.__version__)" && \
+    python -c "import scipy; print('scipy: ' + scipy.__version__)" && \
+    python -c "import matplotlib; print('matplotlib: ' + matplotlib.__version__)" && \
+    python -c "import sympy; print('sympy: ' + sympy.__version__)" && \
+    python -c "import brian; print('brian: ' + brian.__version__)"
 
 # Add matplotlib backend configuration
 RUN mkdir -p /root/.config/matplotlib && \
