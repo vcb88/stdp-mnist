@@ -7,6 +7,15 @@ services:
       - ./mnist:/app/mnist
       - ./weights:/app/weights
       - ./random:/app/random
+      - ./results:/app/results
     environment:
       - DISPLAY=:1
     network_mode: host
+    mem_limit: 4g
+    shm_size: 2g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    command: python Diehl\&Cook_spiking_MNIST.py  # default command, can be overridden
+    working_dir: /app
