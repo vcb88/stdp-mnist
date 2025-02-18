@@ -25,13 +25,26 @@ RUN apt-get update && apt-get install -y \
     python-setuptools \
     && rm -rf /var/lib/apt/lists/*
 
-# Install specific version of pip
-RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
-    python get-pip.py 'pip==20.3.4' && \
+# Install specific version of pip with SSL verification disabled
+RUN wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py && \
+    python get-pip.py --index-url=http://pypi.python.org/simple/ --trusted-host pypi.python.org 'pip==20.3.4' && \
     rm get-pip.py
 
-# Install Brian and dependencies
-RUN pip install --index-url https://pypi.python.org/simple/ --no-deps \
+# Configure pip to trust PyPI
+RUN mkdir -p ~/.pip && \
+    echo "[global]\n\
+trusted-host = \
+    pypi.python.org \
+    pypi.org \
+    files.pythonhosted.org\n\
+timeout = 60\n\
+retries = 10\n" > ~/.pip/pip.conf
+
+# Install specific versions of required packages
+RUN pip install --no-deps \
+    'numpy==1.9.1' \
+    'scipy==0.14.0' \
+    'matplotlib==1.4.2' \
     'sympy==0.7.4' \
     'brian==1.4.1'
 
