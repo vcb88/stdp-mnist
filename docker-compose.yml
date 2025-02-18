@@ -1,0 +1,12 @@
+version: '3'
+services:
+  brian1-stdp:
+    build: .
+    volumes:
+      - .:/app
+      - ./mnist:/app/mnist
+      - ./weights:/app/weights
+      - ./random:/app/random
+    environment:
+      - DISPLAY=:1
+    network_mode: host

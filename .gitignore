@@ -1,0 +1,13 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# Data
+mnist/
+*.pickle
+weights/*.npy
+random/*.npy
+
+# Docker
+.env
