@@ -1,0 +1,6 @@
+# Python package versions as of late 2014
+numpy>=1.9.1,<1.10
+scipy>=0.14.0,<0.15
+matplotlib>=1.4.2,<1.5
+sympy>=0.7.4,<0.8
+brian>=1.4.1,<1.5

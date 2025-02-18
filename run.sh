@@ -8,7 +8,26 @@ mkdir -p mnist weights random results
 # Ensure correct permissions
 chmod 777 mnist weights random results
 
+# Build Docker image
+echo "Building Docker image (this may take a while)..."
+if ! docker-compose build; then
+    echo
+    echo "Error: Docker build failed!"
+    echo "Common issues:"
+    echo "1. Internet connectivity problems"
+    echo "2. Package repository issues"
+    echo "3. Insufficient disk space"
+    echo
+    echo "You can try:"
+    echo "- Check your internet connection"
+    echo "- Run 'docker system prune' to clean up Docker cache"
+    echo "- Check available disk space with 'df -h'"
+    echo
+    exit 1
+fi
+
 # Enable X11 forwarding
+echo "Enabling X11 forwarding..."
 xhost +local:docker
 
 print_status() {

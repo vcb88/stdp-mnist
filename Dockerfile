@@ -1,5 +1,8 @@
 FROM ubuntu:14.04
 
+# Add old-releases repository as 14.04 is no longer supported
+RUN sed -i -e 's/archive.ubuntu.com\|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
 RUN apt-get update && apt-get install -y \
     python2.7 \
     python-pip \
@@ -10,14 +13,21 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libfreetype6-dev \
     libpng12-dev \
+    python-numpy \
+    python-scipy \
+    python-matplotlib \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages
-RUN pip install \
-    numpy==1.9.1 \
-    scipy==0.14.0 \
-    matplotlib==1.4.2 \
-    brian==1.4.1
+# Upgrade pip to a compatible version
+RUN pip install --upgrade "pip < 21.0"
+
+# Configure pip to use old PyPI URL format
+RUN mkdir -p ~/.pip && echo "[global]\nindex-url = https://pypi.python.org/simple/\nformat = legacy" > ~/.pip/pip.conf
+
+# Copy requirements file
+COPY requirements.txt /app/
+# Install specific versions using wheels where possible
+RUN pip install -r /app/requirements.txt
 
 # Set up working directory
 WORKDIR /app
