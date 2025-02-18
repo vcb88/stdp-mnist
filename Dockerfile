@@ -3,7 +3,12 @@ FROM ubuntu:14.04
 # Add old-releases repository as 14.04 is no longer supported
 RUN sed -i -e 's/archive.ubuntu.com\|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 
-# Install all required packages from Ubuntu repositories
+# Add Universe repository for older packages
+RUN sed -i 's/archive/old-releases/g' /etc/apt/sources.list && \
+    sed -i 's/security/old-releases/g' /etc/apt/sources.list && \
+    sed -i 's/^deb h/deb [trusted=yes] h/g' /etc/apt/sources.list
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     python2.7 \
     python-dev \
@@ -14,13 +19,24 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libfreetype6-dev \
     libpng12-dev \
-    python-numpy \
-    python-scipy \
-    python-matplotlib \
-    python-sympy \
-    python-brian \
-    python-setuptools \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure pip to use HTTP and trust all hosts
+RUN mkdir -p ~/.pip && \
+    echo "[global]\n\
+index-url = http://pypi.python.org/simple/\n\
+trusted-host = \
+    pypi.python.org \
+    pypi.org \
+    files.pythonhosted.org" > ~/.pip/pip.conf
+
+# Install older versions of Python packages that were used with Brian 1.4.1
+RUN pip install --index-url http://pypi.python.org/simple/ --trusted-host pypi.python.org \
+    "numpy==1.7.1" \
+    "scipy==0.12.0" \
+    "sympy==0.7.2" \
+    "matplotlib==1.2.1" \
+    "brian==1.4.1"
 
 # Print versions of installed packages for reference
 RUN echo "Installed package versions:" && \
