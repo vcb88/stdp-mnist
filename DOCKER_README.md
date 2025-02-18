@@ -45,25 +45,37 @@ docker-compose build
 
 To train the network (60,000 examples, 3 epochs):
 ```bash
-docker-compose run --rm brian1-stdp python Diehl\&Cook_spiking_MNIST.py --train
+docker-compose run --rm brian1-stdp python "Diehl&Cook_spiking_MNIST.py" --train
 ```
 
 The training process will:
-- Generate initial random weights (saved in `random/` directory)
-- Train the network using STDP
-- Save final weights in `weights/` directory
-- Generate performance plots in `results/` directory
+1. Generate initial random weights (saved in `random/` directory)
+2. Train the network using STDP with:
+   - 60,000 training examples
+   - 3 epochs (180,000 total examples)
+   - Learning rate: nu_ee_pre = 0.0001, nu_ee_post = 0.01
+3. Save final weights in `weights/` directory
+4. Generate performance plots in `results/` directory
+
+During training, you will see:
+- Real-time raster plots of network activity
+- Classification performance updates
+- Weight matrix visualizations
 
 ### Testing Mode
 
 To test the network (10,000 examples):
 ```bash
-docker-compose run --rm brian1-stdp python Diehl\&Cook_spiking_MNIST.py --test
+docker-compose run --rm brian1-stdp python "Diehl&Cook_spiking_MNIST.py" --test
 ```
 
 Testing will:
-- Load trained weights from `weights/` directory
-- Evaluate network performance
+1. Load trained weights from `weights/` directory
+2. Process 10,000 test examples
+3. Generate evaluation plots
+4. Show real-time network activity
+
+Note: Make sure you have trained the network and have weights available in the `weights/` directory before testing.
 - Generate evaluation plots in `results/` directory
 
 ### Visualization

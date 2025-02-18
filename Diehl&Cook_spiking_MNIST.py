@@ -207,7 +207,22 @@ print 'time needed to load test set:', end - start
 #------------------------------------------------------------------------------ 
 # set parameters and equations
 #------------------------------------------------------------------------------
-test_mode = True
+import argparse
+
+parser = argparse.ArgumentParser(description='STDP for MNIST - Training/Testing mode selection')
+parser.add_argument('--train', action='store_true', help='Run in training mode')
+parser.add_argument('--test', action='store_true', help='Run in testing mode')
+args = parser.parse_args()
+
+if args.train and args.test:
+    print("Error: Cannot use both --train and --test at the same time")
+    exit(1)
+elif not (args.train or args.test):
+    print("Error: Must specify either --train or --test")
+    print("Usage: python Diehl&Cook_spiking_MNIST.py [--train|--test]")
+    exit(1)
+
+test_mode = not args.train  # test_mode is True when not in training mode
 
 b.set_global_preferences( 
                         defaultclock = b.Clock(dt=0.5*b.ms), # The default clock to use if none is provided or defined in any enclosing scope.
